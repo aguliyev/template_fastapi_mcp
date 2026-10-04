@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+"$project_root/bin/check-secrets" dev
+"$project_root/bin/compose" up -d --wait postgres
+exec "$project_root/bin/compose" run --rm --no-deps app \
+  python -m template_fastapi_mcp.admin migrate "$@"

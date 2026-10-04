@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+"$project_root/bin/compose" --profile inspector up -d --wait inspector "$@"
+client_port="$(awk -F= '$1 == "CLIENT_PORT" {print substr($0, index($0, "=") + 1)}' "$project_root/etc/dev/.env")"
+printf 'Inspector UI: http://localhost:%s\n' "${client_port:-6274}"

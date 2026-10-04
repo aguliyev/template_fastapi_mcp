@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+"$project_root/bin/check-secrets" all
+for setting in COMPOSE_PROJECT_NAME DEV_DB_NAME TEST_DB_NAME POSTGRES_HOST POSTGRES_PORT; do
+  dev_value="$(awk -F= -v key="$setting" '$1 == key {print substr($0, index($0, "=") + 1)}' "$project_root/etc/dev/.env")"
+  test_value="$(awk -F= -v key="$setting" '$1 == key {print substr($0, index($0, "=") + 1)}' "$project_root/etc/test/.env")"
+  if [[ -z "$dev_value" || "$dev_value" != "$test_value" ]]; then
+    printf 'Shared setting %s must match in dev and test configs\n' "$setting" >&2
+    exit 2
+  fi
+  if [[ -n "${!setting:-}" && "${!setting}" != "$dev_value" ]]; then
+    printf 'Shell override of shared setting %s is not supported\n' "$setting" >&2
+    exit 2
+  fi
+done
+"$project_root/bin/compose" up -d --wait postgres
+"$project_root/bin/compose" --profile test \
+  run --rm --no-deps provision python -m template_fastapi_mcp.admin provision-test
+exec "$project_root/bin/compose" --environment test --profile test \
+  run --rm --no-deps tests python -m template_fastapi_mcp.admin test "$@"

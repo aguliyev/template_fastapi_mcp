@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+
+if ! docker compose version >/dev/null 2>&1; then
+  printf 'Docker Compose plugin is required (Compose 2.17 or newer)\n' >&2
+  exit 1
+fi
+if ! docker compose up --help 2>/dev/null | grep -q -- '--wait'; then
+  printf 'Docker Compose plugin is required (Compose 2.17 or newer)\n' >&2
+  exit 1
+fi
+
+install_file() {
+  local sample="$1" dest="$2"
+  local dest_dir tmpfile
+  if [[ -e "$dest" ]]; then
+    return 0
+  fi
+  dest_dir="$(dirname -- "$dest")"
+  mkdir -p -- "$dest_dir"
+  tmpfile="$(mktemp "$dest_dir/.tmp.XXXXXX")"
+  # ponytail: trap-based cleanup, per-file secret install without helpers
+  # shellcheck disable=SC2064
+  trap "rm -f $(printf '%q' "$tmpfile")" RETURN
+  cp -- "$sample" "$tmpfile"
+  chmod 0600 -- "$tmpfile"
+  if ln "$tmpfile" "$dest" 2>/dev/null; then
+    rm -f -- "$tmpfile"
+    trap - RETURN
+    return 0
+  fi
+  rm -f -- "$tmpfile"
+  trap - RETURN
+  printf 'Secret file already exists: %s\n' "$dest" >&2
+  return 0
+}
+
+copy_config() {
+  local sample="$1" dest="$2"
+  if [[ -e "$dest" ]]; then
+    return 0
+  fi
+  mkdir -p -- "$(dirname -- "$dest")"
+  cp -- "$sample" "$dest"
+}
+
+copy_config "$project_root/etc/dev/.env.example" "$project_root/etc/dev/.env"
+copy_config "$project_root/etc/test/.env.example" "$project_root/etc/test/.env"
+install_file "$project_root/etc/dev/secrets/.env.sample" "$project_root/etc/dev/secrets/.env"
+install_file "$project_root/etc/test/secrets/.env.sample" "$project_root/etc/test/secrets/.env"
+
+printf 'Initialized configuration files without overwriting existing values.\n'
+printf 'Replace placeholder credentials in etc/dev/secrets/.env and etc/test/secrets/.env before starting PostgreSQL.\n'

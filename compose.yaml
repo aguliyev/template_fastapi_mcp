@@ -1,0 +1,90 @@
+x-development: &development
+  image: template_fastapi_mcp:dev
+  build:
+    context: .
+    target: development
+    args:
+      PYTHON_IMAGE: ${PYTHON_IMAGE}
+      UV_IMAGE: ${UV_IMAGE}
+      UV_PROJECT_ENVIRONMENT: ${UV_PROJECT_ENVIRONMENT}
+  working_dir: /workspace
+  env_file: [etc/dev/.env, etc/dev/secrets/.env]
+  volumes: [".:/workspace"]
+  tmpfs: [/workspace/etc]
+
+services:
+  tooling:
+    profiles: [tools]
+    image: template_fastapi_mcp-tooling:dev
+    build:
+      context: .
+      target: bootstrap
+      args:
+        PYTHON_IMAGE: ${PYTHON_IMAGE}
+        UV_IMAGE: ${UV_IMAGE}
+    working_dir: /workspace
+    env_file: [etc/dev/.env]
+    volumes: [".:/workspace"]
+    tmpfs: [/workspace/etc]
+  postgres:
+    image: ${POSTGRES_IMAGE}
+    env_file: [etc/dev/.env, etc/dev/secrets/.env]
+    environment:
+      POSTGRES_DB: ${DEV_DB_NAME}
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  app:
+    <<: *development
+    command: [uvicorn, "template_fastapi_mcp.main:create_app", --factory, --reload, --reload-dir, /workspace/src]
+    ports: ["127.0.0.1:${APP_PORT}:${UVICORN_PORT}"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - 'import os, urllib.request; urllib.request.urlopen("http://127.0.0.1:" + os.environ["UVICORN_PORT"] + "/health", timeout=2)'
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  provision:
+    <<: *development
+    profiles: [test]
+    env_file: [etc/dev/.env, etc/dev/secrets/.env]
+    secrets:
+      - source: test_db_credentials
+        target: test-db.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+  tests:
+    <<: *development
+    profiles: [test]
+    env_file: [etc/test/.env, etc/test/secrets/.env]
+    depends_on:
+      postgres:
+        condition: service_healthy
+  inspector:
+    image: ${INSPECTOR_IMAGE}
+    profiles: [inspector]
+    env_file: [etc/dev/.env]
+    command: [--web]
+    ports: ["127.0.0.1:${CLIENT_PORT}:${CLIENT_PORT}"]
+    depends_on:
+      app:
+        condition: service_healthy
+    logging:
+      driver: none
+
+volumes:
+  postgres_data:
+
+secrets:
+  test_db_credentials:
+    file: ./etc/test/secrets/.env

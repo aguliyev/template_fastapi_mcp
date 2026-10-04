@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+"$project_root/bin/compose" --profile tools build tooling
+exec "$project_root/bin/compose" --profile tools run --rm --no-deps \
+  --user "$(id -u):$(id -g)" tooling uv lock "$@"

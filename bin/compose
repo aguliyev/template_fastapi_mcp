@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+environment_name=dev
+if [[ "${1:-}" == "--environment" ]]; then
+  environment_name="${2:?Missing environment name}"
+  shift 2
+fi
+case "$environment_name" in
+  dev|test) ;;
+  *) printf '%s\n' "Environment must be dev or test" >&2; exit 2 ;;
+esac
+exec docker compose --project-directory "$project_root" \
+  --env-file "$project_root/etc/$environment_name/.env" -f "$project_root/compose.yaml" "$@"

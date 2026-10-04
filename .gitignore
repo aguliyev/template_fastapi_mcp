@@ -1,0 +1,9 @@
+etc/dev/secrets/.env
+etc/test/secrets/.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+dist/
+build/
+*.egg-info/
