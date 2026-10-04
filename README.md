@@ -77,9 +77,11 @@ bin/graphify-setup
 bin/graphify update .
 ```
 
-Use `bin/graphify query "<question>"` for codebase investigations and rerun
-`bin/graphify update .` after code changes. Set `GRAPHIFY_SKIP_HOOK=1` for a
-single commit or checkout when an automatic rebuild is not wanted.
+Use `bin/graphify query "<question>"` for codebase investigations. Graphify
+refreshes automatically after commits and branch switches; run
+`bin/graphify update .` after uncommitted changes when you need an up-to-date
+graph before committing or querying. Set `GRAPHIFY_SKIP_HOOK=1` for a single
+commit or checkout when an automatic rebuild is not wanted.
 
 ## Commands
 
