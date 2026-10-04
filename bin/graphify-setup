@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+
+if ! command -v uv >/dev/null 2>&1; then
+  printf 'Graphify setup requires uv on the host. Install uv and retry.\n' >&2
+  exit 1
+fi
+
+cd -- "$project_root"
+uv sync --group dev
+uv run --group dev graphify hook install
+# Graphify installs this driver automatically, but generated graph output is
+# ignored in this repository and therefore never needs a custom merge driver.
+git config --local --remove-section merge.graphify || true
+python3 - "$project_root/.gitattributes" <<'PY'
+from pathlib import Path
+import sys
+
+attributes_path = Path(sys.argv[1])
+if attributes_path.exists():
+    remaining = [
+        line
+        for line in attributes_path.read_text(encoding="utf-8").splitlines()
+        if line != "graphify-out/graph.json merge=graphify"
+    ]
+    if remaining:
+        attributes_path.write_text("\n".join(remaining) + "\n", encoding="utf-8")
+    else:
+        attributes_path.unlink()
+PY

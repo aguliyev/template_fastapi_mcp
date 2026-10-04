@@ -4,7 +4,9 @@ A Docker-only development template: greeting REST endpoints (FastAPI), an MCP
 server (official `mcp` Python SDK v2, Streamable HTTP), and PostgreSQL, with an
 isolated test database, MCP Inspector support, and automatic reload of mounted
 source. All application commands run in Docker; the host only needs Docker with
-Compose and a shell for the `bin/` wrappers.
+Compose and a shell for the `bin/` wrappers. Graphify is optional local
+developer tooling and additionally requires [uv](https://docs.astral.sh/uv/)
+on the host.
 
 ## Prerequisites
 
@@ -64,11 +66,28 @@ The committed `uv.lock` makes `bin/lock` unnecessary for ordinary checkout
 setup; use it after dependency edits, then `bin/build` and recreate affected
 containers.
 
+## Optional: Graphify codebase navigation
+
+Graphify is local-only tooling: its generated `graphify-out/` directory and
+Git hook configuration are intentionally not committed. To install the pinned
+tool and local hooks, run:
+
+```bash
+bin/graphify-setup
+bin/graphify update .
+```
+
+Use `bin/graphify query "<question>"` for codebase investigations and rerun
+`bin/graphify update .` after code changes. Set `GRAPHIFY_SKIP_HOOK=1` for a
+single commit or checkout when an automatic rebuild is not wanted.
+
 ## Commands
 
 | Command | Purpose |
 | --- | --- |
 | `bin/init` | Copy missing configs/secrets, never overwrite |
+| `bin/graphify` | Run the pinned local Graphify tool through `uv` |
+| `bin/graphify-setup` | Install the pinned tool and local Graphify Git hooks |
 | `bin/check-secrets {dev\|test\|all}` | Validate secret files without printing values |
 | `bin/compose [--environment test] …` | Raw Compose access (dev config by default) |
 | `bin/build` | Build the development image |

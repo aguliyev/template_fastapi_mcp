@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+
+if ! command -v uv >/dev/null 2>&1; then
+  printf 'Graphify requires uv on the host. Install uv, then run bin/graphify-setup.\n' >&2
+  exit 1
+fi
+
+cd -- "$project_root"
+exec uv run --group dev graphify "$@"
