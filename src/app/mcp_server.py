@@ -1,8 +1,8 @@
 from mcp.server import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 
-from template_fastapi_mcp.greetings import GreetingService, StorageUnavailable
-from template_fastapi_mcp.schemas import (
+from app.greetings import GreetingService, StorageUnavailable
+from app.schemas import (
     GreetingCreate,
     GreetingList,
     GreetingOut,

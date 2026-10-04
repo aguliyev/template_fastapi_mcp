@@ -13,7 +13,7 @@ from alembic.config import Config
 from dotenv import dotenv_values
 from pydantic import SecretStr
 
-from template_fastapi_mcp.config import Settings
+from app.config import Settings
 
 TEST_SECRET_PATH = Path("/run/secrets/test-db.env")
 
@@ -133,7 +133,7 @@ def run_tests(settings: Settings, pytest_args: list[str]) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="template_fastapi_mcp.admin")
+    parser = argparse.ArgumentParser(prog="app.admin")
     parser.add_argument("command", choices=["migrate", "provision-test", "test"])
     args, rest = parser.parse_known_args(argv)
     try:

@@ -1,7 +1,7 @@
 import pytest
 from pydantic import SecretStr, ValidationError
 
-from template_fastapi_mcp.config import Settings
+from app.config import Settings
 
 
 def _settings_data(**overrides):

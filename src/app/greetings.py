@@ -2,9 +2,9 @@ from pydantic import TypeAdapter
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
-from template_fastapi_mcp.db import Database
-from template_fastapi_mcp.models import Greeting
-from template_fastapi_mcp.schemas import GreetingCreate, GreetingOut, Limit
+from app.db import Database
+from app.models import Greeting
+from app.schemas import GreetingCreate, GreetingOut, Limit
 
 
 class StorageUnavailable(Exception):

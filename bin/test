@@ -16,6 +16,6 @@ for setting in COMPOSE_PROJECT_NAME DEV_DB_NAME TEST_DB_NAME POSTGRES_HOST POSTG
 done
 "$project_root/bin/compose" up -d --wait postgres
 "$project_root/bin/compose" --profile test \
-  run --rm --no-deps provision python -m template_fastapi_mcp.admin provision-test
+  run --rm --no-deps provision python -m app.admin provision-test
 exec "$project_root/bin/compose" --environment test --profile test \
-  run --rm --no-deps tests python -m template_fastapi_mcp.admin test "$@"
+  run --rm --no-deps tests python -m app.admin test "$@"

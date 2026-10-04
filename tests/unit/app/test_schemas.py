@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
-from template_fastapi_mcp.schemas import GreetingCreate, GreetingOut, Limit
+from app.schemas import GreetingCreate, GreetingOut, Limit
 
 
 def test_name_is_trimmed():

@@ -24,8 +24,7 @@ copied project, rename these coordinated surfaces together:
 
 - Repository directory.
 - `[project].name` in `pyproject.toml`.
-- Import package directory `src/template_fastapi_mcp/` and all imports of
-  `template_fastapi_mcp`.
+- Import package directory `src/app/` and all imports of `app`.
 - Compose project name (`COMPOSE_PROJECT_NAME`) and image names in
   `compose.yaml`.
 - Database names (`DEV_DB_NAME`, `TEST_DB_NAME`, `APP_DB_NAME`).
@@ -46,7 +45,7 @@ bin/check-secrets all
 bin/build
 bin/compose up -d --wait postgres
 bin/migrate
-bin/up
+bin/start
 bin/test -q
 bin/inspector
 ```
@@ -56,7 +55,7 @@ bin/inspector
 `secrets/.env.sample` (mode `0600`), without overwriting existing values.
 Both secret files use `POSTGRES_USER` and `POSTGRES_PASSWORD`, but you must
 replace the placeholders with **different** development and test values before
-running `bin/up`, `bin/migrate`, or `bin/test`. Changing development
+running `bin/start`, `bin/migrate`, or `bin/test`. Changing development
 credentials does not reinitialize a persisted PostgreSQL volume; guarded
 provisioning updates only the configured test role's password without touching
 development roles or data.
@@ -75,8 +74,8 @@ containers.
 | `bin/build` | Build the development image |
 | `bin/lock` | Regenerate `uv.lock` in Docker |
 | `bin/migrate` | Apply Alembic migrations to the dev database |
-| `bin/up` | Start the app (waits until healthy) |
-| `bin/down` | Stop services, preserving data |
+| `bin/start` | Start the app (waits until healthy) |
+| `bin/stop` | Stop services, preserving data |
 | `bin/logs` | Follow `app` + `postgres` logs (Inspector excluded) |
 | `bin/test …` | Provision test DB, migrate, run pytest |
 | `bin/inspector` | Start the MCP Inspector web UI |
@@ -127,7 +126,7 @@ and Inspector logs are disabled so the token banner is not recorded.
 - Schema changes: edit migrations, then run the explicit `bin/migrate`
   (dev) — startup never migrates implicitly. Tests migrate the test database
   via `bin/test`.
-- `bin/down` preserves the PostgreSQL volume; there is no automatic reset.
+- `bin/stop` preserves the PostgreSQL volume; there is no automatic reset.
 
 ## Troubleshooting (sanitized)
 

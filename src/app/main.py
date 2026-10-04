@@ -4,11 +4,11 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from mcp.server.transport_security import TransportSecuritySettings
 
-from template_fastapi_mcp.api import build_router
-from template_fastapi_mcp.config import Settings
-from template_fastapi_mcp.db import Database
-from template_fastapi_mcp.greetings import GreetingService, StorageUnavailable
-from template_fastapi_mcp.mcp_server import build_mcp
+from app.api import build_router
+from app.config import Settings
+from app.db import Database
+from app.greetings import GreetingService, StorageUnavailable
+from app.mcp_server import build_mcp
 
 
 def _transport_security(settings: Settings) -> TransportSecuritySettings:

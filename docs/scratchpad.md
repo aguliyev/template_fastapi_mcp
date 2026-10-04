@@ -1,6 +1,6 @@
 Angents stop: This file is for humans only. 
 
-
+----------------------
 
 work in projects/template_fastapi_mcp , this is the project route.
 
@@ -16,3 +16,21 @@ questions to me?
 
 -----------------------
 
+rename 
+src/template_fastapi_mcp
+
+to
+src/app
+
+with all imports etc.
+
+in tests/ the directory/files should mirror the implementation.
+
+
+bin/start and bin/stop instead of up and down
+
+
+--------------------
+
+we want bin/test to run quickly, it should be used by agents.
+should we run tests in the same 

@@ -3,9 +3,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from pydantic import SecretStr
 
-import template_fastapi_mcp.admin as admin_module
-from template_fastapi_mcp.admin import ensure_test_database, load_test_settings
-from template_fastapi_mcp.config import Settings
+import app.admin as admin_module
+from app.admin import ensure_test_database, load_test_settings
+from app.config import Settings
 
 
 @pytest.fixture
@@ -58,7 +58,7 @@ def test_load_test_settings_rejects_missing_or_extra_keys(
 @pytest.mark.anyio
 async def test_provision_refuses_development_target(monkeypatch, test_settings):
     connect = AsyncMock()
-    monkeypatch.setattr("template_fastapi_mcp.admin.asyncpg.connect", connect)
+    monkeypatch.setattr("app.admin.asyncpg.connect", connect)
     wrong = test_settings.model_copy(update={"app_db_name": test_settings.dev_db_name})
     with pytest.raises(ValueError):
         await ensure_test_database(
@@ -72,7 +72,7 @@ async def test_provision_refuses_development_target(monkeypatch, test_settings):
 @pytest.mark.anyio
 async def test_provision_refuses_equal_database_names(monkeypatch, test_settings):
     connect = AsyncMock()
-    monkeypatch.setattr("template_fastapi_mcp.admin.asyncpg.connect", connect)
+    monkeypatch.setattr("app.admin.asyncpg.connect", connect)
     wrong = test_settings.model_copy(
         update={
             "dev_db_name": "same_db",
@@ -92,7 +92,7 @@ async def test_provision_refuses_equal_database_names(monkeypatch, test_settings
 @pytest.mark.anyio
 async def test_provision_refuses_reused_development_login(monkeypatch, test_settings):
     connect = AsyncMock()
-    monkeypatch.setattr("template_fastapi_mcp.admin.asyncpg.connect", connect)
+    monkeypatch.setattr("app.admin.asyncpg.connect", connect)
     with pytest.raises(ValueError):
         await ensure_test_database(
             test_settings,
@@ -160,7 +160,7 @@ async def test_provision_refuses_unsafe_existing_role(
         owns_other=owns_other,
     )
     connect.return_value = connection
-    monkeypatch.setattr("template_fastapi_mcp.admin.asyncpg.connect", connect)
+    monkeypatch.setattr("app.admin.asyncpg.connect", connect)
     with pytest.raises(ValueError):
         await ensure_test_database(
             test_settings,

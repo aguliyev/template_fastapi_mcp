@@ -6,8 +6,8 @@ import pytest
 from pydantic import ValidationError
 from sqlalchemy import select
 
-from template_fastapi_mcp.models import Greeting
-from template_fastapi_mcp.schemas import GreetingCreate
+from app.models import Greeting
+from app.schemas import GreetingCreate
 
 
 @pytest.mark.anyio

@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from template_fastapi_mcp.config import Settings
+from app.config import Settings
 
 
 class Database:

@@ -9,7 +9,7 @@ def anyio_backend():
 
 @pytest.fixture
 def test_settings():
-    from template_fastapi_mcp.config import Settings
+    from app.config import Settings
 
     settings = Settings()
     settings.assert_test_target()
@@ -18,7 +18,7 @@ def test_settings():
 
 @pytest.fixture
 async def db(test_settings):
-    from template_fastapi_mcp.db import Database
+    from app.db import Database
 
     test_settings.assert_test_target()
     database = Database(test_settings)
@@ -45,7 +45,7 @@ async def db(test_settings):
 
 @pytest.fixture
 async def greeting_service(db):
-    from template_fastapi_mcp.greetings import GreetingService
+    from app.greetings import GreetingService
 
     return GreetingService(db)
 
@@ -55,7 +55,7 @@ async def rest_client(db, test_settings):
     from asgi_lifespan import LifespanManager
     from httpx import ASGITransport, AsyncClient
 
-    from template_fastapi_mcp.main import create_app
+    from app.main import create_app
 
     app = create_app(test_settings)
     async with LifespanManager(app):

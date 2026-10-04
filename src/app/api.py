@@ -2,8 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query
 
-from template_fastapi_mcp.greetings import GreetingService
-from template_fastapi_mcp.schemas import GreetingCreate, GreetingOut
+from app.greetings import GreetingService
+from app.schemas import GreetingCreate, GreetingOut
 
 
 def build_router(service: GreetingService) -> APIRouter:

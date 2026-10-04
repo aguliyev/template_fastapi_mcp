@@ -5,8 +5,8 @@ from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from template_fastapi_mcp.config import Settings
-from template_fastapi_mcp.models import Base
+from app.config import Settings
+from app.models import Base
 
 config = context.config
 

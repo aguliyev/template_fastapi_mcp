@@ -39,7 +39,7 @@ services:
       retries: 30
   app:
     <<: *development
-    command: [uvicorn, "template_fastapi_mcp.main:create_app", --factory, --reload, --reload-dir, /workspace/src]
+    command: [uvicorn, "app.main:create_app", --factory, --reload, --reload-dir, /workspace/src]
     ports: ["127.0.0.1:${APP_PORT}:${UVICORN_PORT}"]
     depends_on:
       postgres:

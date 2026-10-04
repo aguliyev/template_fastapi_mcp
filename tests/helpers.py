@@ -8,7 +8,7 @@ import subprocess
 import sys
 from httpx import AsyncClient
 
-from template_fastapi_mcp.config import Settings
+from app.config import Settings
 
 
 @asynccontextmanager
@@ -29,7 +29,7 @@ async def live_server(
             sys.executable,
             "-m",
             "uvicorn",
-            "template_fastapi_mcp.main:create_app",
+            "app.main:create_app",
             "--factory",
             "--host",
             "127.0.0.1",
