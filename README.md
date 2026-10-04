@@ -83,34 +83,90 @@ containers.
 All wrappers resolve paths relative to their own location, so they work when
 invoked from outside the project directory.
 
-## Endpoints and tools
+## Use the web API
 
-- `GET /health` → `{"status":"ok"}` (independent of PostgreSQL).
-- `POST /greetings` accepts `{"name":"Anar"}`, returns HTTP 201:
+After `bin/start`, the development server is available at `http://localhost:8000`
+(the default `APP_PORT` in `etc/dev/.env`). Open the interactive API page at
+[`http://localhost:8000/docs`](http://localhost:8000/docs). The machine-readable
+OpenAPI JSON document is at
+[`http://localhost:8000/openapi.json`](http://localhost:8000/openapi.json).
+
+The REST endpoints are:
+
+- `GET http://localhost:8000/health` → `{"status":"ok"}` (independent of
+  PostgreSQL).
+- `POST http://localhost:8000/greetings` accepts JSON `{"name":"Anar"}` and
+  returns HTTP 201:
 
 ```json
 {"id":"…","name":"Anar","created_at":"2026-10-04T12:00:00Z"}
 ```
 
-- `GET /greetings?limit=20` returns a JSON array, newest first
+- `GET http://localhost:8000/greetings?limit=20` returns a JSON array, newest
+  first
   (`created_at DESC, id DESC`). Limit: 1–100, default 20.
-- Interactive docs: `/docs` and `/openapi.json`.
-- MCP endpoint: `/mcp` over Streamable HTTP.
-  - `create_greeting(name: str)` → greeting object (`id`, `name`, `created_at`).
-  - `list_greetings(limit: int = 20)` → `{"greetings":[…]}`.
-- Names are trimmed; empty/whitespace-only or >100 characters are rejected.
-  Duplicate names are allowed. REST input errors are HTTP 422; storage failures
-  are sanitized HTTP 503. MCP failures are protocol tool errors without SQL,
-  credentials, or connection strings.
+
+For example, create and list a greeting with curl:
+
+```bash
+curl -X POST http://localhost:8000/greetings \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Anar"}'
+
+curl 'http://localhost:8000/greetings?limit=20'
+```
+
+## Use the MCP server
+
+The MCP server uses Streamable HTTP at
+[`http://localhost:8000/mcp`](http://localhost:8000/mcp). Configure an MCP
+client with that URL and the Streamable HTTP transport. It exposes these tools:
+
+- `create_greeting` with `{"name":"Anar"}` returns a greeting object
+  (`id`, `name`, `created_at`).
+- `list_greetings` with `{"limit":20}` returns
+  `{"greetings":[…]}`; `limit` defaults to 20 and must be 1–100.
+
+The Python SDK client can call the tools like this (run from an environment
+with this project's dependencies installed):
+
+```python
+import asyncio
+from mcp import Client
+
+
+async def main():
+    async with Client("http://localhost:8000/mcp") as client:
+        created = await client.call_tool("create_greeting", {"name": "Anar"})
+        print(created.structured_content)
+
+        listed = await client.call_tool("list_greetings", {"limit": 20})
+        print(listed.structured_content)
+
+
+asyncio.run(main())
+```
+
+Names are trimmed; empty/whitespace-only or >100 characters are rejected.
+Duplicate names are allowed. REST input errors are HTTP 422; storage failures
+are sanitized HTTP 503. MCP failures are protocol tool errors without SQL,
+credentials, or connection strings.
 
 ## Inspector
 
-`bin/inspector` prints only the non-secret browser URL
-(`http://localhost:6274` by default). In the UI, add a Streamable HTTP server
-with the Compose-network target `http://app:8000/mcp`, connect, create `Anar`,
-and list it. Host clients separately reach MCP at `http://localhost:8000/mcp`.
-UI authentication stays enabled; the token is injected into the served page,
-and Inspector logs are disabled so the token banner is not recorded.
+Run `bin/inspector` after `bin/start`. It starts the Inspector container and
+prints the browser URL [`http://localhost:6274`](http://localhost:6274) (the
+default `CLIENT_PORT`). In Inspector, choose **Import from registry config**,
+select [docs/inspector-registry-config.json](docs/inspector-registry-config.json),
+and import the listed server. Then connect and use `create_greeting` with
+`{"name":"Anar"}` or `list_greetings` with `{"limit":20}` to try the tools.
+The config uses `http://app:8000/mcp`, which resolves from the Inspector
+container over the Compose network. If you run Inspector directly on the host,
+change the imported server URL to `http://localhost:8000/mcp` instead.
+
+Inspector UI authentication stays enabled; its token is injected into the
+served page, and Inspector logs are disabled so the token banner is not
+recorded.
 
 ## Development workflow
 

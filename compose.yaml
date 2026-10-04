@@ -31,6 +31,7 @@ services:
     env_file: [etc/dev/.env, etc/dev/secrets/.env]
     environment:
       POSTGRES_DB: ${DEV_DB_NAME}
+    ports: ["127.0.0.1:${POSTGRES_PORT}:5432"]
     volumes: ["postgres_data:/var/lib/postgresql/data"]
     healthcheck:
       test: [CMD-SHELL, 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
