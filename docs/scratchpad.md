@@ -31,6 +31,3 @@ bin/start and bin/stop instead of up and down
 
 
 --------------------
-
-we want bin/test to run quickly, it should be used by agents.
-should we run tests in the same 
